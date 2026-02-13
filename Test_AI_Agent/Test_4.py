@@ -1,4 +1,6 @@
+import os
 from fileinput import filename
+from pyexpat.errors import messages
 from typing import Annotated, TypedDict, Sequence, Union
 from dotenv import load_dotenv
 from groq import Groq
@@ -46,19 +48,20 @@ def save(filename: str) -> str:
 
     
 tools = [update, save]
-llm = ChatGroq(model="llama-3.1-8b-instant").bind_tools(tools)
+llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0).bind_tools(tools)
 
 def agent(state: agentstate) -> agentstate:
     system_prompt = SystemMessage(content=f"""
-    you are drafter, a helpful assistant that helps users draft a document.
-    you are going to update and save the document based on the user's input.
-    - if the user wants to update the document, use the update tool and provide the new content.
-    - if the user wants to save the document, use the save tool and provide the filename
-    - if the user wants to continue editing, just respond with a message and wait for the next input.
-    - make sure to always show the current document state after each update.
+    You are Drafter, a helpful writing assistant. You are going to help the user update and modify documents.
+    
+    - If the user wants to update or modify content, use the 'update' tool with the complete updated content.
+    - If the user wants to save and finish, you need to use the 'save' tool.
+    - Make sure to always show the current document state after modifications.
     
     The current document content is:{document_content}
-    """)                              
+    """)
+
+                        
     if not state["messages"]:
         user_input = input("i am your drafting assistant. \n how can i help you with your document today? ")
         user_message = HumanMessage(content=user_input)
@@ -67,6 +70,8 @@ def agent(state: agentstate) -> agentstate:
         user_input = input("what else would you like to do with your document? ")
         print(f"\n User: {user_input}")
         user_message = HumanMessage(content=user_input)
+        
+            
 
     all_messages = [system_prompt] + list(state["messages"]) + [user_message]
     response = llm.invoke(all_messages)
@@ -85,10 +90,9 @@ def should_continue(state: agentstate) -> str:
         return "continue"
     
     for message in reversed(state["messages"]):
-        if (isinstance(message,ToolMessage) and 
-            "saved" in message.content.lower() and 
-            "document" in message.content.lower()): 
-            return "end"
+        if (isinstance(message,ToolMessage)):
+            if "saved" in message.content.lower():
+                return "end"
     return "continue"
 
 def print_message(messages):
@@ -117,13 +121,12 @@ app = graph.compile()
 
 def run_document_agent():
     print(" \n====DRAFTER AGENT STARTED====")
-
-    state = {"messages": [HumanMessage(content="Load the file heartache.txt")]}
-
+    
+    state = {"messages": []}
+    
     for step in app.stream(state, stream_mode="values"):
         if "messages" in step:
             print_message(step["messages"])
-
     print("\n ====ENDED====")
 
 if __name__ == "__main__":
