@@ -43,7 +43,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 pages_split = text_splitter.split_documents(pages)
 
 persist_directory = r"C:\Users\hp\OneDrive\Desktop\LangGraph\Test_AI_Agent"
-collection_name = "stock_market"
+collection_name = "cloud_computing"
 
 #if the directory doesnt exit than create a new directory
 if not os.path.exists(persist_directory):
