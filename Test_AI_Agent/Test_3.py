@@ -2,7 +2,7 @@ from typing import Annotated, TypedDict, Sequence, Union
 from dotenv import load_dotenv
 from groq import Groq
 from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage, ToolMessage, BaseMessage
+from langchain_core.messages import SystemMessage, BaseMessage
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages #reducer function
