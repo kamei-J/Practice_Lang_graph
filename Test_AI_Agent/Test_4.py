@@ -1,5 +1,5 @@
 import os
-from typing import Annotated, TypedDict, Sequence, Union
+from typing import Annotated, TypedDict, Sequence
 from dotenv import load_dotenv
 from groq import Groq
 from langchain_groq import ChatGroq
