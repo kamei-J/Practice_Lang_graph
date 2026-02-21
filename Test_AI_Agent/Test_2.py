@@ -13,7 +13,7 @@ class agentstate(TypedDict):
      
 
 llm = ChatGroq(
-    model="llama-3.1-8b-instant")
+    model="llama-3.1-8b-instant", temperature=0)
 
 def process(state: agentstate) -> agentstate:
     response = llm.invoke(state['messaage'])
